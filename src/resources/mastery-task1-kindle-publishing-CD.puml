@@ -1,1 +1,78 @@
 PARTICIPANTS: use this file for creating the class diagram in mastery task 01
+@startuml
+class GetBookActivity {
+    - recommendationServiceClient : RecommendationsServiceClient
+    - catalogDao : CatalogDao
+    + execute(GetBookRequest) : GetBookResponse
+}
+RecommendationsServiceClient --o GetBookActivity
+CatalogDao --o GetBookActivity
+
+
+class GetPublishingStatusActivity {
++ execute(GetPublishingStatusRequest) : GetPublishingStatusResponse
+}
+
+class RemoveBookFromCatalogActivity {
++ execute(RemoveBookFromCatalogRequest) : RemoveBookFromCatalogResponse
+}
+
+class SubmitBookForPublishingActivity {
+- publishingStatusDao : PublishingStatusDao
++ execute(SubmitBookForPublishingRequest) : SubmitBookForPublishingResponse
+}
+
+PublishingStatusDao --o SubmitBookForPublishingActivity
+
+
+class RecommendationsServiceClient {
+- recommendationsService : RecommendationsService
++ getBookRecommendations(BookGenre) : List<BookRecommendation>
+}
+
+RecommendationsService --o RecommendationsServiceClient
+BookRecommendation --o RecommendationsServiceClient
+
+class CatalogDao {
+- dynamoDbMapper : DynamoDBMapper
++ getBookFromCatalog(String) : CatalogItemVersion
++ getLatestVersionOfBook(String) : CatalogItemVersion
+}
+
+DynamoDBMapper --o CatalogDao
+CatalogItemVersion --o CatalogDao
+BookNotFoundException --> CatalogDao
+
+class PublishingStatusDao {
+- ADDITIONAL_NOTES_PREFIX: String
+- dynamoDbMapper : DynamoDBMapper
++ setPublishingStatus(String, PublishingRecordStatus, String) : PublishingStatusItem
++ setPublishingStatus(String, PublishingRecordStatus, String, String) : PublishingStatusItem
+}
+
+DynamoDBMapper --o PublishingStatusDao
+PublishingStatusItem --o PublishingStatusDao
+
+class CatalogItemVersion {
+- @DynamoDBHashKey bookId : String
+- @DynamoDBRangeKey version : int
+- inactive : boolean
+- title : String
+- author : String
+- text : String
+- @DynamoDBTypeConvertedEnum genre : BookGenre
+}
+
+class PublishingStatusItem {
+- @DynamoDBHashKey publishingRecordId : String
+- @DynamoDBRangeKey status : PublishingRecordStatus
+- @DynamoDBTypeConvertedEnum statusMessage : String
+- bookId : String
+}
+
+BookNotFoundException --|> RuntimeException
+PublishingStatusNotFoundException --|> RuntimeException
+
+class BookNotFoundException {}
+class PublishingStatusNotFoundException {}
+@enduml
