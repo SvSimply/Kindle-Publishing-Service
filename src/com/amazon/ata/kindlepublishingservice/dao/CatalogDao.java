@@ -49,6 +49,13 @@ public class CatalogDao {
             CatalogItemVersion bookToUpdate = getLatestVersionOfBook(book.getBookId());
             book.setVersion(bookToUpdate.getVersion());
             dynamoDbMapper.save(book);
+        } else {
+            CatalogItemVersion bookToUpdate = getLatestVersionOfBook(book.getBookId());
+            bookToUpdate.setInactive(true);
+            dynamoDbMapper.save(bookToUpdate);
+            book.setVersion(bookToUpdate.getVersion() + 1);
+            dynamoDbMapper.save(book);
+
         }
 
         return book;

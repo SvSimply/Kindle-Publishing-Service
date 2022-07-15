@@ -25,6 +25,6 @@ public class RemoveBookFromCatalogActivity {
         book.setInactive(true);
         catalogDao.saveBookToCatalog(book);
 
-        return null;
+        return new RemoveBookFromCatalogResponse();
     }
 }
