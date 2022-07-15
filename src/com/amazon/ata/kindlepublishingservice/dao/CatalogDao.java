@@ -42,6 +42,18 @@ public class CatalogDao {
         return book;
     }
 
+    public CatalogItemVersion saveBookToCatalog(CatalogItemVersion book) {
+        // If The book object has inactive = true, then update the Latest Version Of Book
+        // If The book object has inactive = false, then close previous Latest Version Of Book and create a new item
+        if (book.isInactive()) {
+            CatalogItemVersion bookToUpdate = getLatestVersionOfBook(book.getBookId());
+            book.setVersion(bookToUpdate.getVersion());
+            dynamoDbMapper.save(book);
+        }
+
+        return book;
+    }
+
     // Returns null if no version exists for the provided bookId
     private CatalogItemVersion getLatestVersionOfBook(String bookId) {
         CatalogItemVersion book = new CatalogItemVersion();
@@ -58,4 +70,6 @@ public class CatalogDao {
         }
         return results.get(0);
     }
+
+
 }
