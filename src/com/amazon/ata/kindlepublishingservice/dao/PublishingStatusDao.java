@@ -1,5 +1,6 @@
 package com.amazon.ata.kindlepublishingservice.dao;
 
+import com.amazon.ata.kindlepublishingservice.dynamodb.models.CatalogItemVersion;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.PublishingStatusItem;
 import com.amazon.ata.kindlepublishingservice.enums.PublishingRecordStatus;
 import com.amazon.ata.kindlepublishingservice.exceptions.PublishingStatusNotFoundException;
@@ -76,5 +77,20 @@ public class PublishingStatusDao {
         item.setBookId(bookId);
         dynamoDbMapper.save(item);
         return item;
+    }
+
+    public List<PublishingStatusItem> getPublishingStatuses(String publishingStatusId) {
+        PublishingStatusItem statusItem = new PublishingStatusItem();
+        statusItem.setPublishingRecordId(publishingStatusId);
+        DynamoDBQueryExpression<PublishingStatusItem> queryExpression = new DynamoDBQueryExpression()
+                .withHashKeyValues(statusItem)
+                .withScanIndexForward(false);
+
+        List<PublishingStatusItem> statusItems = dynamoDbMapper.query(PublishingStatusItem.class, queryExpression);
+        if (statusItems.isEmpty()) {
+            throw new PublishingStatusNotFoundException("Publishing Status Not Found with publishingStatusId "+ publishingStatusId);
+        }
+
+        return statusItems;
     }
 }
