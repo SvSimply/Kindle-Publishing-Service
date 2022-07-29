@@ -18,23 +18,27 @@ public final class BookPublishTask implements Runnable{
         this.requestManager = requestManager;
         this.publishingStatusDao = publishingStatusDao;
         this.catalogDao = catalogDao;
+//        System.out.println("I'm in BookPublishTask constructor");
     }
 
     @Override
     public void run() {
         // retrieve request from queue
+//        System.out.println("I'm in BookPublishTask RUN");
         BookPublishRequest request = requestManager.getBookPublishRequestToProcess();
         if (request == null) {
+//            System.out.println("I'm in BookPublishTask RUN. queue is empty");
             return;
         }
-
+//        System.out.println("I'm in BookPublishTask RUN. queue is NOT empty");
         PublishingStatusItem publishingStatusItem;
+        publishingStatusItem = publishingStatusDao.setPublishingStatus(request.getPublishingRecordId(),
+                PublishingRecordStatus.IN_PROGRESS,
+                request.getBookId());
+//        System.out.println("I'm in BookPublishTask RUN. Write IN_PROGRESS");
         try {
             // do the publishing attempt
             // to create PublishingStatusItem IN_PROGRESS
-            publishingStatusItem = publishingStatusDao.setPublishingStatus(request.getPublishingRecordId(),
-                    PublishingRecordStatus.IN_PROGRESS,
-                    request.getBookId());
             // generate KindleFormattedBook
             KindleFormattedBook kindleBook = KindleFormatConverter.format(request);
 
