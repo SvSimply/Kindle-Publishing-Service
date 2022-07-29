@@ -26,7 +26,7 @@ import static org.testng.Assert.*;
 
 public class MasteryTaskFourSubmitBookForPublishingTests extends IntegrationTestBase {
     private static final Duration GET_EXPECTED_STATUS_BUFFER = Duration.ofMillis(500L);
-    private static final int MAX_GET_EXPECTED_STATUS_ATTEMPTS = 10;
+    private static final int MAX_GET_EXPECTED_STATUS_ATTEMPTS = 30;
     private static final ApplicationComponent COMPONENT = DaggerApplicationComponent.create();
 
     /**

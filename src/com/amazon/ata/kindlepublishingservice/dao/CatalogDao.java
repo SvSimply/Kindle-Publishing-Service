@@ -69,6 +69,38 @@ public class CatalogDao {
         }
     }
 
+    public CatalogItemVersion createOrUpdateBook(KindleFormattedBook kindleBook) {
+        if (kindleBook.getBookId() == null) {
+            // Check if bookId is null, and it's a new book
+            // Create a new Catalog Item
+            CatalogItemVersion book = new CatalogItemVersion();
+            book.setBookId(KindlePublishingUtils.generateBookId());
+            book.setInactive(false);
+            book.setVersion(1);
+            book.setAuthor(kindleBook.getAuthor());
+            book.setGenre(kindleBook.getGenre());
+            book.setText(kindleBook.getText());
+            book.setTitle(kindleBook.getTitle());
+            dynamoDbMapper.save(book);
+            return book;
+
+        } else {
+            // Check if bookId is not null and find the corresponding Catalog Item
+            // Mark previous Catalog Item as inactive, create a new Catalog Item with updated version
+            CatalogItemVersion book = new CatalogItemVersion();
+            book.setBookId(kindleBook.getBookId());
+            book.setInactive(false);
+            book.setVersion(0);
+            book.setAuthor(kindleBook.getAuthor());
+            book.setGenre(kindleBook.getGenre());
+            book.setText(kindleBook.getText());
+            book.setTitle(kindleBook.getTitle());
+
+            return saveBookToCatalog(book);
+        }
+
+    }
+
     // Returns null if no version exists for the provided bookId
     private CatalogItemVersion getLatestVersionOfBook(String bookId) {
         CatalogItemVersion book = new CatalogItemVersion();
