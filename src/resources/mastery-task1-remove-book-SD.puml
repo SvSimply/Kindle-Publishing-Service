@@ -1,1 +1,24 @@
 PARTICIPANTS: use this file for creating the remove book from catalog diagram in mastery task 01
+@startuml
+title Remove Book From Catalog
+
+actor Client
+participant "Load Balancer/ECS" as Load
+participant RemoveBookFromCatalogActivity
+participant CatalogDao
+database DynamoDB
+participant RemoveBookFromCatalogResponse
+
+Client -> Load : HTTP request
+Load -> RemoveBookFromCatalogActivity : execute(RemoveBookFromCatalogRequest)
+RemoveBookFromCatalogActivity -> CatalogDao : removeBookFromCatalog()
+RemoveBookFromCatalogActivity -> Load : RemoveBookFromCatalogResponse
+
+alt if book ID does not exist or already inactive
+    CatalogDao <-- DynamoDB : null
+    RemoveBookFromCatalogActivity <-- CatalogDao : throw BookNotFoundException
+    Client <-- Load : 404 Response
+else otherwise, continue
+end
+
+@enduml

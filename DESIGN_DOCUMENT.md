@@ -263,7 +263,7 @@ Below are the data models for the DynamoDB tables.
 
 ### RemoveBookFromCatalog
 
-<**MT01.MILESTONE 1**>
+![Sequence diagram for RemoveBookFromCatalog API](src/resources/mastery-task1-remove-book-SD-Remove_Book_From_Catalog.png)
 
 [Link to sequence diagram PUML file](src/resources/mastery-task1-remove-book-SD.puml)
 

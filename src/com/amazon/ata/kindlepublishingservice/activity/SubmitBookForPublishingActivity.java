@@ -9,11 +9,13 @@ import com.amazon.ata.kindlepublishingservice.dynamodb.models.PublishingStatusIt
 import com.amazon.ata.kindlepublishingservice.enums.PublishingRecordStatus;
 import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequest;
 
+import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequestManager;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
+import javax.validation.ValidationException;
 
 /**
  * Implementation of the SubmitBookForPublishingActivity for ATACurriculumKindlePublishingService's
@@ -24,6 +26,8 @@ import javax.inject.Inject;
 public class SubmitBookForPublishingActivity {
 
     private PublishingStatusDao publishingStatusDao;
+    private CatalogDao catalogDao;
+    private BookPublishRequestManager manager;
 
     /**
      * Instantiates a new SubmitBookForPublishingActivity object.
@@ -31,8 +35,10 @@ public class SubmitBookForPublishingActivity {
      * @param publishingStatusDao PublishingStatusDao to access the publishing status table.
      */
     @Inject
-    public SubmitBookForPublishingActivity(PublishingStatusDao publishingStatusDao) {
+    public SubmitBookForPublishingActivity(PublishingStatusDao publishingStatusDao, CatalogDao catalogDao, BookPublishRequestManager manager) {
         this.publishingStatusDao = publishingStatusDao;
+        this.catalogDao = catalogDao;
+        this.manager = manager;
     }
 
     /**
@@ -49,10 +55,27 @@ public class SubmitBookForPublishingActivity {
 
         // TODO: If there is a book ID in the request, validate it exists in our catalog
         // TODO: Submit the BookPublishRequest for processing
+        if (bookPublishRequest.getBookId() != null) {
+            catalogDao.validateBookExists(bookPublishRequest.getBookId());
+        }
+
+        if (request.getTitle() == null || request.getTitle().isEmpty()) {
+            throw new ValidationException("Title couldn't be empty");
+        } else if (request.getAuthor() == null || request.getAuthor().isEmpty()) {
+            throw new ValidationException("Author couldn't be empty");
+        } else if (request.getGenre() == null || request.getGenre().isEmpty()) {
+            throw new ValidationException("Genre couldn't be empty");
+        } else if (request.getText() == null || request.getText().isEmpty()) {
+            throw new ValidationException("Text couldn't be empty");
+        }
+
 
         PublishingStatusItem item =  publishingStatusDao.setPublishingStatus(bookPublishRequest.getPublishingRecordId(),
                 PublishingRecordStatus.QUEUED,
                 bookPublishRequest.getBookId());
+
+
+        manager.addBookPublishRequest(bookPublishRequest);
 
         return SubmitBookForPublishingResponse.builder()
                 .withPublishingRecordId(item.getPublishingRecordId())
